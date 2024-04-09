@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Predator.Components;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +13,9 @@ namespace Predator
 {
     partial class Service : ServiceBase
     {
+        private bool flagActive = false;
+        private ServiceWork sw = new ServiceWork();
+
         public Service()
         {
             InitializeComponent();
@@ -19,17 +23,29 @@ namespace Predator
 
         protected override void OnStart(string[] args)
         {
-            // TODO: Add code here to start your service.
+            TimerSearch.Start();
         }
 
         protected override void OnStop()
         {
-            // TODO: Add code here to perform any tear-down necessary to stop your service.
+            TimerSearch.Start();
         }
 
         private void TimerSearch_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            Console.WriteLine(flagActive);
+            if (flagActive) return;
 
+            try
+            {
+                flagActive = true;
+                sw.InitService();
+            }catch (Exception ex)
+            {
+                EventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+            }
+
+            flagActive = false;
         }
     }
 }

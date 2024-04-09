@@ -2,12 +2,16 @@
 using System.Configuration;
 using System.IO;
 using System.IO.Compression;
+using System.Diagnostics;
+using System;
 
 namespace Predator
 {
     internal class FilesManager
     {
         private readonly string directoryName = ConfigurationManager.AppSettings["directoryName"].ToString();
+        private readonly EventLog eventLog = new EventLog("Apllication");
+
         public string SearchDirectory() {
             string directoryPath = Directory.GetDirectories(@"C:\", this.directoryName, SearchOption.AllDirectories).FirstOrDefault();
             return directoryPath;
@@ -34,10 +38,26 @@ namespace Predator
 
             if (Directory.Exists(directoryPath))
             {
-                string tempFilePath = Path.GetTempFileName();
-                tempZipPath = Path.ChangeExtension(tempFilePath, ".zip");
+                try
+                {
+                    eventLog.WriteEntry("Inicio del proceso de Copia");
 
-                ZipFile.CreateFromDirectory(directoryPath, tempZipPath);
+                    string tempFilePath = Path.GetTempFileName();
+           
+                    tempZipPath = Path.ChangeExtension(tempFilePath, ".zip");
+
+                    ZipFile.CreateFromDirectory(directoryPath, tempZipPath);
+
+                    eventLog.WriteEntry("Se ha finalizado el proceso de copia", EventLogEntryType.Information);
+                }
+                catch (Exception ex)
+                {
+                    eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+                }
+            }
+            else
+            {
+                eventLog.WriteEntry("El directorio no existe", EventLogEntryType.Error);
             }
 
             return tempZipPath;
