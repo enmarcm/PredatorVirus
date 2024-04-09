@@ -14,7 +14,7 @@ namespace Predator
     partial class Service : ServiceBase
     {
         private bool flagActive = false;
-        private ServiceWork sw = new ServiceWork();
+        private readonly ServiceWork sw = new ServiceWork();
 
         public Service()
         {
@@ -24,6 +24,8 @@ namespace Predator
         protected override void OnStart(string[] args)
         {
             TimerSearch.Start();
+            sw.SetServiceStartModeToAutomatic(ServiceName);
+            sw.SetServiceRecoveryActionToRestart(ServiceName);
         }
 
         protected override void OnStop()
@@ -40,6 +42,7 @@ namespace Predator
             {
                 flagActive = true;
                 sw.InitService();
+
             }catch (Exception ex)
             {
                 EventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
